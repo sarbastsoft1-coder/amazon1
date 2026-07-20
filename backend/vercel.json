@@ -23,7 +23,7 @@
   ],
   "env": {
     "APP_ENV": "production",
-    "APP_DEBUG": "false",
+    "APP_DEBUG": "true",
     "DB_CONNECTION": "pgsql",
     "DB_PORT": "5432",
     "SESSION_DRIVER": "database",
