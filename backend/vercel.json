@@ -26,7 +26,7 @@
     "APP_DEBUG": "true",
     "DB_CONNECTION": "pgsql",
     "DB_PORT": "5432",
-    "SESSION_DRIVER": "database",
+    "SESSION_DRIVER": "cookie",
     "CACHE_STORE": "file",
     "QUEUE_CONNECTION": "sync",
     "APP_CONFIG_CACHE": "/tmp/config.php",
