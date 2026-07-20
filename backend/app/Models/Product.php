@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'store_id',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'price',
+        'compare_price',
+        'stock',
+        'sku',
+        'images',
+        'is_active',
+        'status',
+        'admin_notes',
+        'amazon_asin',
+        'amazon_price',
+        'amazon_fees',
+        'synced_with_amazon',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'compare_price' => 'decimal:2',
+        'amazon_price' => 'decimal:2',
+        'amazon_fees' => 'decimal:2',
+        'images' => 'array',
+        'is_active' => 'boolean',
+        'synced_with_amazon' => 'boolean',
+    ];
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+}
