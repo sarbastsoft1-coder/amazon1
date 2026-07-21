@@ -74,7 +74,7 @@ class AppRoutes {
       case onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case language:
-        return MaterialPageRoute(builder: (_) => const LanguageScreen());
+        return MaterialPageRoute(builder: (_) => LanguageScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case register:
@@ -116,7 +116,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AuctionsScreen());
       case auctionDetails:
         final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(builder: (_) => AuctionDetailsScreen(auctionId: args?['auctionId'] ?? 0));
+        return MaterialPageRoute(builder: (_) => AuctionDetailsScreen(productId: args?['productId'] ?? 0));
       case wishlist:
         return MaterialPageRoute(builder: (_) => const WishlistScreen());
       case notifications:
@@ -137,11 +137,11 @@ class AppRoutes {
       case reviews:
         return MaterialPageRoute(builder: (_) => const ReviewsScreen());
       case languageSettings:
-        return MaterialPageRoute(builder: (_) => const LanguageSettingsScreen());
+        return MaterialPageRoute(builder: (_) => LanguageSettingsScreen());
       case currency:
-        return MaterialPageRoute(builder: (_) => const CurrencyScreen());
+        return MaterialPageRoute(builder: (_) => CurrencyScreen());
       case notificationSettings:
-        return MaterialPageRoute(builder: (_) => const NotificationSettingsScreen());
+        return MaterialPageRoute(builder: (_) => NotificationSettingsScreen());
       case security:
         return MaterialPageRoute(builder: (_) => const SecurityScreen());
       case changePassword:

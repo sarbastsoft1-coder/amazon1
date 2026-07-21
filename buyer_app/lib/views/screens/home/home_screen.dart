@@ -1,8 +1,9 @@
-import 'dart:ui';
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
 import '../../../config/theme.dart';
+import '../../../core/responsive/responsive.dart';
 import '../../../data/models/product.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../widgets/common/widgets.dart';
@@ -31,45 +32,53 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppTheme.textPrimary, size: 28),
+          icon: Icon(Icons.menu, color: AppTheme.textPrimary, size: 28),
           onPressed: () {},
         ),
         titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.only(right: 16.0),
+          padding: EdgeInsets.only(right: 16.0),
           child: GestureDetector(
             onTap: () => Navigator.pushNamed(context, AppRoutes.search),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppTheme.surfaceColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
                   SizedBox(width: 8),
-                  Text('Browse categories...', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                  Text('Browse categories...'.tr(context), style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                 ],
               ),
             ),
           ),
         ),
       ),
-      body: provider.loading
-          ? const Center(child: CircularProgressIndicator())
+      body: SafeArea(
+        top: false, // AppBar already handles top
+        bottom: true,
+        child: provider.loading
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const BannerSlider(),
-                  const SizedBox(height: 16),
-                  const CategoryFilterBar(),
-                  const SizedBox(height: 8),
+                  BannerSlider(),
+                  SizedBox(height: 16),
+                  CategoryFilterBar(),
+                  SizedBox(height: 8),
+                  if (provider.auctions.isNotEmpty) ...[
+                    SectionTitle(title: 'Auction Products'.tr(context),
+                      onSeeAll: () => Navigator.pushNamed(context, AppRoutes.auctions),
+                    ),
+                    ProductHorizontalList(products: provider.auctions),
+                  ],
                   if (provider.flashSale.isNotEmpty) ...[
-                    SectionTitle(
-                      title: 'Flash Sale',
+                    SectionTitle(title: 'Flash Sale'.tr(context),
                       onSeeAll: () => Navigator.pushNamed(context, AppRoutes.productList, arguments: {'title': 'Flash Sale'}),
                     ),
                     ProductHorizontalList(products: provider.flashSale),
@@ -82,39 +91,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     ProductHorizontalList(products: provider.newArrivals.take(6).toList()),
                   ],
                   if (provider.newArrivals.isNotEmpty) ...[
-                    SectionTitle(
-                      title: 'New Arrivals',
+                    SectionTitle(title: 'New Arrivals'.tr(context),
                       onSeeAll: () => Navigator.pushNamed(context, AppRoutes.productList, arguments: {'title': 'New Arrivals'}),
                     ),
                     ProductHorizontalList(products: provider.newArrivals),
                   ],
                   if (provider.bestSellers.isNotEmpty) ...[
-                    SectionTitle(
-                      title: 'Best Sellers',
+                    SectionTitle(title: 'Best Sellers'.tr(context),
                       onSeeAll: () => Navigator.pushNamed(context, AppRoutes.productList, arguments: {'title': 'Best Sellers'}),
                     ),
                     ProductHorizontalList(products: provider.bestSellers),
                   ],
                   if (provider.featured.isNotEmpty) ...[
-                    SectionTitle(
-                      title: 'Recommended Products',
+                    SectionTitle(title: 'Recommended Products'.tr(context),
                       onSeeAll: () => Navigator.pushNamed(context, AppRoutes.productList, arguments: {'title': 'Recommended'}),
                     ),
                     ProductHorizontalList(products: provider.featured),
                   ],
-                  if (provider.auctions.isNotEmpty) ...[
-                    SectionTitle(
-                      title: 'Auction Products',
-                      onSeeAll: () => Navigator.pushNamed(context, AppRoutes.auctions),
-                    ),
-                    ProductHorizontalList(products: provider.auctions),
-                  ],
-                  const CategoryGrid(),
-                  const BrandGrid(),
-                  const SizedBox(height: 24),
+
+                  CategoryGrid(),
+                  BrandGrid(),
+                  SizedBox(height: 24),
                 ],
               ),
             ),
+      ),
     );
   }
 }
@@ -130,7 +131,7 @@ class _BannerSliderState extends State<BannerSlider> {
   final _controller = PageController();
   int _currentPage = 0;
 
-  final _banners = const [
+  final _banners = [
     {'color': Color(0xFF3B82F6), 'title': 'Summer Sale', 'subtitle': 'Up to 50% off'},
     {'color': Color(0xFF10B981), 'title': 'New Arrivals', 'subtitle': 'Discover the latest'},
     {'color': Color(0xFFF59E0B), 'title': 'Flash Deals', 'subtitle': 'Limited time offers'},
@@ -148,17 +149,18 @@ class _BannerSliderState extends State<BannerSlider> {
 
   @override
   Widget build(BuildContext context) {
+    final bannerHeight = Responsive(context).hp(22).clamp(140.0, 220.0);
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: bannerHeight,
           child: PageView.builder(
             controller: _controller,
             itemCount: _banners.length,
             itemBuilder: (context, index) {
               final banner = _banners[index];
               return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -170,7 +172,7 @@ class _BannerSliderState extends State<BannerSlider> {
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: (banner['color'] as Color).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 8))
+                    BoxShadow(color: (banner['color'] as Color).withValues(alpha: 0.3), blurRadius: 16, offset: Offset(0, 8))
                   ],
                 ),
                 child: Stack(
@@ -188,16 +190,16 @@ class _BannerSliderState extends State<BannerSlider> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(28),
+                      padding: EdgeInsets.all(28),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             banner['title'] as String,
-                            style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                            style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             banner['subtitle'] as String,
                             style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 16, fontWeight: FontWeight.w500),
@@ -211,19 +213,19 @@ class _BannerSliderState extends State<BannerSlider> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             _banners.length,
             (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
+              duration: Duration(milliseconds: 300),
               curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
+              margin: EdgeInsets.symmetric(horizontal: 4),
               width: _currentPage == index ? 28 : 10,
               height: 10,
               decoration: BoxDecoration(
-                color: _currentPage == index ? AppTheme.primaryColor : const Color(0xFFE2E8F0),
+                color: _currentPage == index ? AppTheme.primaryColor : Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -240,17 +242,26 @@ class ProductHorizontalList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = Responsive(context);
+    final hasAuctions = products.any((p) => p.isAuction);
+    // Responsive height: percentage of screen height
+    final listHeight = hasAuctions
+        ? r.hp(38).clamp(260.0, 360.0)
+        : r.hp(32).clamp(220.0, 300.0);
+    // Responsive card width: percentage of screen width
+    final cardWidth = r.wp(42).clamp(140.0, 200.0);
+
     return SizedBox(
-      height: 260, // Increased slightly to accommodate padding for shadows
+      height: listHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: products.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        separatorBuilder: (context, index) => SizedBox(width: r.isSmall ? 10 : 16),
         itemBuilder: (context, index) {
           final product = products[index];
           return SizedBox(
-            width: 160,
+            width: cardWidth,
             child: ProductCard(
               product: product,
               onTap: () => Navigator.pushNamed(context, AppRoutes.productDetails, arguments: {'productId': product.id}),
@@ -281,9 +292,9 @@ class CategoryGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'Categories'),
+        SectionTitle(title: 'Categories'.tr(context)),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
             spacing: 16,
             runSpacing: 16,
@@ -302,13 +313,13 @@ class CategoryGrid extends StatelessWidget {
                           color: AppTheme.surfaceColor,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: Offset(0, 4))
                           ],
                         ),
                         child: Icon(cat['icon'] as IconData, color: AppTheme.primaryColor, size: 28),
                       ),
-                      const SizedBox(height: 8),
-                      Text(cat['name'] as String, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
+                      SizedBox(height: 8),
+                      Text(cat['name'] as String, textAlign: TextAlign.center, style: TextStyle(fontSize: 11)),
                     ],
                   ),
                 ),
@@ -331,25 +342,25 @@ class BrandGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'Popular Brands'),
+        SectionTitle(title: 'Popular Brands'.tr(context)),
         SizedBox(
           height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             itemCount: brands.length,
             itemBuilder: (context, index) {
               return Container(
                 width: 100,
-                margin: const EdgeInsets.only(right: 12),
+                margin: EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: Offset(0, 4))
                   ],
                 ),
-                child: Center(child: Text(brands[index], style: const TextStyle(fontWeight: FontWeight.w700))),
+                child: Center(child: Text(brands[index], style: TextStyle(fontWeight: FontWeight.w700))),
               );
             },
           ),
@@ -372,17 +383,17 @@ class CategoryFilterBar extends StatelessWidget {
       height: 48,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16),
         children: [
           // Sort Dropdown
           _SortDropdown(
             currentSort: provider.sortBy,
             onChanged: (sort) => provider.setSortBy(sort),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           // "All" chip
           _FilterChip(
-            label: 'All',
+            label: 'All'.tr(context),
             isSelected: selectedCategory == null,
             onTap: () => provider.setCategory(null),
             count: provider.allProducts.length,
@@ -429,7 +440,7 @@ class _SortDropdown extends StatelessWidget {
     return PopupMenuButton<String>(
       onSelected: onChanged,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      offset: const Offset(0, 48),
+      offset: Offset(0, 48),
       itemBuilder: (context) => [
         _buildMenuItem('default', 'Default', Icons.auto_awesome, currentSort == 'default'),
         _buildMenuItem('price_asc', 'Price: Low to High', Icons.arrow_upward, currentSort == 'price_asc'),
@@ -438,7 +449,7 @@ class _SortDropdown extends StatelessWidget {
         _buildMenuItem('rating', 'Top Rated', Icons.star, currentSort == 'rating'),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
         decoration: BoxDecoration(
           color: currentSort != 'default'
               ? AppTheme.primaryColor.withValues(alpha: 0.08)
@@ -459,7 +470,7 @@ class _SortDropdown extends StatelessWidget {
               size: 18,
               color: currentSort != 'default' ? AppTheme.primaryColor : AppTheme.textSecondary,
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(
               _label,
               style: TextStyle(
@@ -468,7 +479,7 @@ class _SortDropdown extends StatelessWidget {
                 color: currentSort != 'default' ? AppTheme.primaryColor : AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             Icon(
               Icons.arrow_drop_down,
               size: 18,
@@ -490,7 +501,7 @@ class _SortDropdown extends StatelessWidget {
             size: 18,
             color: isSelected ? AppTheme.primaryColor : AppTheme.textSecondary,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Text(
             label,
             style: TextStyle(
@@ -500,7 +511,7 @@ class _SortDropdown extends StatelessWidget {
             ),
           ),
           if (isSelected) ...[
-            const Spacer(),
+            Spacer(),
             Icon(Icons.check, size: 18, color: AppTheme.primaryColor),
           ],
         ],
@@ -527,10 +538,10 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        margin: const EdgeInsets.only(left: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        margin: EdgeInsets.only(left: 8),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected
@@ -554,16 +565,16 @@ class _FilterChip extends StatelessWidget {
               ),
             ),
             if (isSelected) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '$count',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,

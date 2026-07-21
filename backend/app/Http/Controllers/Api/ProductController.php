@@ -47,6 +47,8 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'sku' => 'nullable|string|max:255',
             'amazon_asin' => 'nullable|string|max:255',
+            'is_auction' => 'boolean',
+            'auction_end_time' => 'nullable|date',
         ]);
 
         $store = Store::findOrFail($data['store_id']);
@@ -81,6 +83,8 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'amazon_asin' => 'nullable|string|max:255',
             'is_active' => 'sometimes|boolean',
+            'is_auction' => 'sometimes|boolean',
+            'auction_end_time' => 'nullable|date',
         ]);
 
         if (isset($data['name'])) {

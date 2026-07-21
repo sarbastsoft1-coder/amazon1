@@ -1,4 +1,4 @@
-import '../models/auction.dart';
+
 import '../models/category.dart';
 import '../models/order.dart';
 import '../models/product.dart';
@@ -109,7 +109,7 @@ class MockDataService {
         name: 'Auction Item - Vintage Camera',
         slug: 'vintage-camera',
         description: 'Rare vintage camera for collectors.',
-        price: 150.00,
+        price: 0,
         stock: 1,
         sku: 'AC-007',
         images: const [],
@@ -119,16 +119,21 @@ class MockDataService {
         brand: 'Canon',
         categoryId: 2,
         categoryName: 'Electronics',
+        startingBid: 100.00,
+        currentBid: 150.00,
+        reservePrice: 200.00,
+        minimumIncrement: 5.0,
+        auctionStart: DateTime.now().subtract(const Duration(hours: 1)),
+        auctionEnd: DateTime.now().add(const Duration(hours: 2)),
+        status: 'live',
       ),
       Product(
         id: 8,
-        name: 'Gaming Mouse',
+        name: 'Auction Item - Gaming Mouse',
         slug: 'gaming-mouse',
         description: 'High-precision gaming mouse with RGB lighting.',
-        price: 69.99,
-        comparePrice: 89.99,
-        discount: 22,
-        stock: 25,
+        price: 0,
+        stock: 1,
         sku: 'GM-008',
         images: const [],
         rating: 4.5,
@@ -136,16 +141,21 @@ class MockDataService {
         brand: 'Logitech',
         categoryId: 2,
         categoryName: 'Electronics',
+        isAuction: true,
+        startingBid: 30.00,
+        currentBid: null,
+        minimumIncrement: 2.0,
+        auctionStart: DateTime.now().add(const Duration(hours: 1)),
+        auctionEnd: DateTime.now().add(const Duration(hours: 24)),
+        status: 'upcoming',
       ),
       Product(
         id: 9,
-        name: 'Luxury Leather Wallet',
+        name: 'Auction Item - Luxury Wallet',
         slug: 'luxury-leather-wallet',
         description: 'Premium leather wallet with RFID protection.',
-        price: 89.99,
-        comparePrice: 119.99,
-        discount: 25,
-        stock: 35,
+        price: 0,
+        stock: 0,
         sku: 'LW-009',
         images: const [],
         rating: 4.6,
@@ -153,6 +163,14 @@ class MockDataService {
         brand: 'Gucci',
         categoryId: 1,
         categoryName: 'Fashion',
+        isAuction: true,
+        startingBid: 50.00,
+        currentBid: 120.00,
+        minimumIncrement: 5.0,
+        auctionStart: DateTime.now().subtract(const Duration(days: 2)),
+        auctionEnd: DateTime.now().subtract(const Duration(days: 1)),
+        status: 'closed',
+        winnerId: 'user_123',
       ),
       Product(
         id: 10,
@@ -263,23 +281,5 @@ class MockDataService {
     ];
   }
 
-  static List<Auction> getMockAuctions() {
-    final products = getMockProducts();
-    return [
-      Auction(
-        id: 1,
-        product: products[6],
-        currentPrice: 150.00,
-        endTime: DateTime.now().add(const Duration(hours: 2)),
-        status: 'live',
-      ),
-      Auction(
-        id: 2,
-        product: products[4],
-        currentPrice: 45.00,
-        endTime: DateTime.now().add(const Duration(hours: 5)),
-        status: 'live',
-      ),
-    ];
-  }
+
 }

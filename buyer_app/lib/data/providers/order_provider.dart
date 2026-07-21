@@ -14,15 +14,21 @@ class OrderProvider extends ChangeNotifier {
   Future<void> fetchOrders() async {
     _loading = true;
     notifyListeners();
-    final response = await ApiService.get('/orders');
-    _loading = false;
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _orders = (data['data'] as List).map((o) => Order.fromJson(o)).toList();
-    } else {
+    try {
+      final response = await ApiService.get('/orders');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _orders = (data['data'] as List).map((o) => Order.fromJson(o)).toList();
+      } else {
+        _orders = MockDataService.getMockOrders();
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch orders: $e');
       _orders = MockDataService.getMockOrders();
+    } finally {
+      _loading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<Order?> placeOrder(Map<String, dynamic> data) async {

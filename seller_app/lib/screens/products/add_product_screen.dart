@@ -1,5 +1,14 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/product_provider.dart';
 
 class AddProductScreen extends StatefulWidget {
   final int? productId;
@@ -18,6 +27,114 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _sku = TextEditingController();
   final _brand = TextEditingController();
   bool _loading = false;
+  bool _isCompressing = false;
+  bool _isAuction = false;
+  DateTime? _auctionEndTime;
+
+  final List<XFile> _selectedImages = [];
+  final ImagePicker _picker = ImagePicker();
+
+  Future<XFile?> _compressImage(XFile file) async {
+    if (kIsWeb) {
+      return file; // Web handles compression directly via HTTP or we skip it for now
+    }
+    try {
+      final tempDir = await path_provider.getTemporaryDirectory();
+      final extensionName = p.extension(file.path);
+      final targetPath = p.join(
+        tempDir.path,
+        '${DateTime.now().millisecondsSinceEpoch}_compressed$extensionName',
+      );
+
+      final result = await FlutterImageCompress.compressAndGetFile(
+        file.path,
+        targetPath,
+        quality: 80,
+        minWidth: 800,
+        minHeight: 800,
+      );
+
+      return result;
+    } catch (e) {
+      debugPrint('Error compressing image: $e');
+    }
+    return null;
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    if (_selectedImages.length >= 5) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You can only add up to 5 images for a product.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (pickedFile != null) {
+        setState(() => _isCompressing = true);
+        final compressedFile = await _compressImage(pickedFile);
+        setState(() => _isCompressing = false);
+
+        if (compressedFile != null) {
+          setState(() {
+            _selectedImages.add(compressedFile);
+          });
+        }
+      }
+    } catch (e) {
+      setState(() => _isCompressing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  void _showImageSourceActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   // Category selection
   String? _selectedCategory;
@@ -56,6 +173,35 @@ class _AddProductScreenState extends State<AddProductScreen> {
     'Automotive': Color(0xFF3F51B5),
   };
 
+  Future<void> _selectAuctionEndTime() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _auctionEndTime ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      if (!mounted) return;
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_auctionEndTime ?? DateTime.now()),
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          _auctionEndTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+      }
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
@@ -68,18 +214,89 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
-    setState(() => _loading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _loading = false);
-    if (mounted) {
+    if (_isAuction && _auctionEndTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.productId == null ? 'Product published!' : 'Product updated!'),
+        const SnackBar(
+          content: Text('Please select an auction end time.'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: Colors.orange,
         ),
       );
-      Navigator.pop(context);
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    final user = context.read<AuthProvider>().user;
+    final storeId = user?.storeId;
+    if (storeId == null) {
+      setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: No store associated with this account. Please set up your store first.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Map Category name to seeded category ID
+    int categoryId;
+    if (_selectedCategory == 'Electronics') {
+      categoryId = 1;
+    } else if (_selectedCategory == 'Fashion') {
+      categoryId = 4;
+    } else {
+      categoryId = 1; // Default fallback to Electronics
+    }
+
+    final payload = {
+      'store_id': storeId,
+      'category_id': categoryId,
+      'name': _name.text,
+      'description': _description.text,
+      'price': double.tryParse(_price.text) ?? 0.0,
+      'stock': int.tryParse(_stock.text) ?? 0,
+      'sku': _sku.text.isNotEmpty ? _sku.text : null,
+      'is_auction': _isAuction,
+      'auction_end_time': _isAuction && _auctionEndTime != null ? _auctionEndTime!.toIso8601String() : null,
+    };
+
+    bool success = false;
+    try {
+      if (widget.productId == null) {
+        success = await context.read<ProductProvider>().createProduct(payload, _selectedImages);
+      } else {
+        success = await context.read<ProductProvider>().updateProduct(widget.productId!, payload, _selectedImages);
+      }
+    } catch (e) {
+      debugPrint('Error saving product: $e');
+      success = false;
+    } finally {
+      setState(() => _loading = false);
+    }
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.productId == null ? 'Product published!' : 'Product updated!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+        Navigator.pop(context, true); // Return true to trigger refresh
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save product. Please try again.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -524,6 +741,168 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 20),
+
+              // Auction Section
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      title: const Text('Sell as Auction', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      subtitle: const Text('Allow buyers to place bids on this item.', style: TextStyle(fontSize: 12)),
+                      value: _isAuction,
+                      activeTrackColor: AppTheme.primaryColor.withOpacity(0.4),
+                      activeThumbColor: AppTheme.primaryColor,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isAuction = value;
+                        });
+                      },
+                    ),
+                    if (_isAuction)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Auction End Time:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            TextButton.icon(
+                              onPressed: _selectAuctionEndTime,
+                              icon: const Icon(Icons.calendar_today, size: 16),
+                              label: Text(
+                                _auctionEndTime != null
+                                    ? '${_auctionEndTime!.year}-${_auctionEndTime!.month.toString().padLeft(2, '0')}-${_auctionEndTime!.day.toString().padLeft(2, '0')} ${_auctionEndTime!.hour.toString().padLeft(2, '0')}:${_auctionEndTime!.minute.toString().padLeft(2, '0')}'
+                                    : 'Select Time',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Product Images Section
+              const Text(
+                'Product Images',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedImages.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      // Add Image Button
+                      final isLimitReached = _selectedImages.length >= 5;
+                      return GestureDetector(
+                        onTap: isLimitReached
+                            ? () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('You can only add up to 5 images for a product.'),
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              }
+                            : _showImageSourceActionSheet,
+                        child: Container(
+                          width: 100,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: isLimitReached ? Colors.grey.withValues(alpha: 0.02) : Colors.grey.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isLimitReached ? Colors.grey.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.3),
+                              style: BorderStyle.solid,
+                              width: 1,
+                            ),
+                          ),
+                          child: _isCompressing
+                              ? const Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.secondaryColor),
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_a_photo_outlined,
+                                      color: isLimitReached ? Colors.grey : AppTheme.secondaryColor,
+                                      size: 28,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Add Photo',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: isLimitReached ? Colors.grey : AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      );
+                    }
+
+                    final imageFile = _selectedImages[index - 1];
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            image: DecorationImage(
+                              image: kIsWeb 
+                                  ? NetworkImage(imageFile.path) as ImageProvider
+                                  : FileImage(File(imageFile.path)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 16,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedImages.removeAt(index - 1);
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 20),
 

@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/routes.dart';
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -97,8 +99,26 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       if (mounted) _progressController.forward();
     });
 
-    Future.delayed(const Duration(milliseconds: 3200), () {
-      if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+    Future.delayed(const Duration(milliseconds: 3200), () async {
+      if (!mounted) return;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final isFirstTime = prefs.getBool('is_first_time') ?? true;
+        final token = await ApiService.getToken();
+
+        if (!mounted) return;
+        if (token != null) {
+          Navigator.pushReplacementNamed(context, AppRoutes.main);
+        } else if (isFirstTime) {
+          Navigator.pushReplacementNamed(context, AppRoutes.language);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        }
+      }
     });
   }
 

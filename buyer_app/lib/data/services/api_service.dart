@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://127.0.0.1:8000/api',
+    defaultValue: 'https://backend-qqq25.vercel.app/api',
   );
 
   static Future<String?> getToken() async {

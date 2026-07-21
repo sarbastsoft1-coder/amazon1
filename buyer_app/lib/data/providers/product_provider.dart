@@ -104,31 +104,44 @@ class ProductProvider extends ChangeNotifier {
       path += '?${params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&')}';
     }
 
-    final response = await ApiService.get(path);
-    _loading = false;
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _products = (data['data'] as List).map((p) => Product.fromJson(p)).toList();
-      _allProducts = List.from(_products);
-      _error = null;
-    } else {
-      _error = 'Failed to load products';
+    try {
+      final response = await ApiService.get(path);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _products = (data['data'] as List).map((p) => Product.fromJson(p)).toList();
+        _allProducts = List.from(_products);
+        _error = null;
+      } else {
+        _error = 'Failed to load products';
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch products: $e');
+      _error = 'Network error: Failed to load products';
     }
+    
+    _loading = false;
     notifyListeners();
   }
 
   Future<void> fetchHomeData() async {
     _loading = true;
     notifyListeners();
-    final response = await ApiService.get('/products');
-    _loading = false;
+    
     List<Product> all = [];
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      all = (data['data'] as List).map((p) => Product.fromJson(p)).toList();
-    } else {
+    try {
+      final response = await ApiService.get('/products');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        all = (data['data'] as List).map((p) => Product.fromJson(p)).toList();
+      } else {
+        all = MockDataService.getMockProducts();
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch home data: $e');
       all = MockDataService.getMockProducts();
     }
+    
+    _loading = false;
     _allProducts = all;
     _selectedCategory = null;
     _sortBy = 'default';
@@ -143,11 +156,16 @@ class ProductProvider extends ChangeNotifier {
   }
 
   Future<void> fetchCategories() async {
-    final response = await ApiService.get('/categories');
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _categories = (data['data'] as List).map((c) => Category.fromJson(c)).toList();
-    } else {
+    try {
+      final response = await ApiService.get('/categories');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _categories = (data['data'] as List).map((c) => Category.fromJson(c)).toList();
+      } else {
+        _categories = MockDataService.getMockCategories();
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch categories: $e');
       _categories = MockDataService.getMockCategories();
     }
     notifyListeners();

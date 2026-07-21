@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../config/routes.dart';
 
@@ -70,9 +71,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     super.dispose();
   }
 
-  void _onNext() {
+  void _onNext() async {
     if (_currentPage == _pages.length - 1) {
-      Navigator.pushReplacementNamed(context, AppRoutes.language);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('is_first_time', false);
+      } catch (e) {
+        debugPrint('Error saving first time status: $e');
+      }
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
     } else {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -81,8 +89,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     }
   }
 
-  void _skip() {
-    Navigator.pushReplacementNamed(context, AppRoutes.language);
+  void _skip() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_first_time', false);
+    } catch (e) {
+      debugPrint('Error saving first time status: $e');
+    }
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, AppRoutes.login);
   }
 
   @override

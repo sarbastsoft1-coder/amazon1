@@ -17,6 +17,15 @@ class Product {
   final int? categoryId;
   final String? categoryName;
 
+  final double? startingBid;
+  final double? currentBid;
+  final double? reservePrice;
+  final double? minimumIncrement;
+  final DateTime? auctionStart;
+  final DateTime? auctionEnd;
+  final String? winnerId;
+  final String? status;
+
   Product({
     required this.id,
     required this.name,
@@ -35,6 +44,14 @@ class Product {
     this.brand,
     this.categoryId,
     this.categoryName,
+    this.startingBid,
+    this.currentBid,
+    this.reservePrice,
+    this.minimumIncrement,
+    this.auctionStart,
+    this.auctionEnd,
+    this.winnerId,
+    this.status,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -56,6 +73,14 @@ class Product {
       brand: json['brand'],
       categoryId: json['category_id'],
       categoryName: json['category_name'] ?? json['category']?['name'],
+      startingBid: json['starting_bid'] != null ? double.tryParse(json['starting_bid'].toString()) : null,
+      currentBid: json['current_bid'] != null ? double.tryParse(json['current_bid'].toString()) : null,
+      reservePrice: json['reserve_price'] != null ? double.tryParse(json['reserve_price'].toString()) : null,
+      minimumIncrement: json['minimum_increment'] != null ? double.tryParse(json['minimum_increment'].toString()) : null,
+      auctionStart: json['auction_start'] != null ? DateTime.tryParse(json['auction_start'].toString()) : null,
+      auctionEnd: json['auction_end'] != null ? DateTime.tryParse(json['auction_end'].toString()) : null,
+      winnerId: json['winner_id']?.toString(),
+      status: json['status']?.toString(),
     );
   }
 }

@@ -27,6 +27,8 @@ class Product extends Model
         'amazon_price',
         'amazon_fees',
         'synced_with_amazon',
+        'is_auction',
+        'auction_end_time',
     ];
 
     protected $casts = [
@@ -37,6 +39,8 @@ class Product extends Model
         'images' => 'array',
         'is_active' => 'boolean',
         'synced_with_amazon' => 'boolean',
+        'is_auction' => 'boolean',
+        'auction_end_time' => 'datetime',
     ];
 
     public function store()

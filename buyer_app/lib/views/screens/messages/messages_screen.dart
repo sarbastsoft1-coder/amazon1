@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import '../../../config/routes.dart';
 import '../../../config/theme.dart';
@@ -8,20 +9,20 @@ class MessagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(title: Text('Messages'.tr(context))),
       body: ListView.builder(
         itemCount: 5,
         itemBuilder: (context, index) {
           return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: AppTheme.primaryColor,
-                child: Text('S${index + 1}', style: const TextStyle(color: Colors.white)),
+                child: Text('S${index + 1}', style: TextStyle(color: Colors.white)),
               ),
-              title: Text('Seller ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Last message preview...'),
-              trailing: const Text('10:30 AM', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              title: Text('Seller ${index + 1}', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('Last message preview...'.tr(context)),
+              trailing: Text('10:30 AM'.tr(context), style: TextStyle(color: Colors.grey, fontSize: 12)),
               onTap: () => Navigator.pushNamed(context, AppRoutes.chat, arguments: {'sellerName': 'Seller ${index + 1}'}),
             ),
           );
@@ -62,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final msg = _messages[index];
@@ -70,8 +71,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 return Align(
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
+                    margin: EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isMe ? AppTheme.primaryColor : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
@@ -83,17 +84,17 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(hintText: 'Type a message...'),
+                    decoration: InputDecoration(hintText: 'Type a message...'.tr(context)),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.send, color: AppTheme.primaryColor),
+                  icon: Icon(Icons.send, color: AppTheme.primaryColor),
                   onPressed: _send,
                 ),
               ],

@@ -1,6 +1,8 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import '../../../config/routes.dart';
 import '../../../config/theme.dart';
+import '../../../core/responsive/responsive.dart';
 import '../../../data/models/product.dart';
 import '../../../data/services/mock_data_service.dart';
 import '../../widgets/common/widgets.dart';
@@ -25,15 +27,15 @@ class CategoriesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Categories'),
+        title: Text('Categories'.tr(context)),
         backgroundColor: AppTheme.backgroundColor,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 1.1,
             crossAxisSpacing: 16,
@@ -61,7 +63,7 @@ class CategoriesScreen extends StatelessWidget {
                     BoxShadow(
                       color: (cat['color'] as Color).withValues(alpha: 0.3),
                       blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      offset: Offset(0, 8),
                     ),
                   ],
                 ),
@@ -105,10 +107,10 @@ class CategoriesScreen extends StatelessWidget {
                             ),
                             child: Icon(cat['icon'] as IconData, size: 30, color: Colors.white),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Text(
                             cat['name'] as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
@@ -142,7 +144,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
   List<Product> _products = [];
   String _sortBy = 'default';
   bool _isGridView = true;
-  RangeValues _priceRange = const RangeValues(0, 500);
+  RangeValues _priceRange = RangeValues(0, 500);
   bool _loading = true;
 
   @override
@@ -195,7 +197,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
@@ -225,13 +227,13 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const Text('Filter & Sort', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 20),
+                  Text('Filter & Sort'.tr(context), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 24),
 
                   // Sort Options
-                  const Text('Sort By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 12),
+                  Text('Sort By'.tr(context), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -243,20 +245,20 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                       _buildSortChip('Rating', 'rating', tempSort, (v) => setModalState(() => tempSort = v)),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Price Range
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Price Range', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                      Text('Price Range'.tr(context), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                       Text(
                         '\$${tempRange.start.round()} - \$${tempRange.end.round()}',
                         style: TextStyle(fontSize: 13, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   RangeSlider(
                     values: tempRange,
                     min: 0,
@@ -270,7 +272,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     ),
                     onChanged: (values) => setModalState(() => tempRange = values),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Apply button
                   Row(
@@ -279,14 +281,14 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                         child: OutlinedButton(
                           onPressed: () {
                             setModalState(() {
-                              tempRange = const RangeValues(0, 500);
+                              tempRange = RangeValues(0, 500);
                               tempSort = 'default';
                             });
                           },
-                          child: const Text('Reset'),
+                          child: Text('Reset'.tr(context)),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
@@ -296,7 +298,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                             _applySortAndFilter();
                             Navigator.pop(context);
                           },
-                          child: const Text('Apply'),
+                          child: Text('Apply'.tr(context)),
                         ),
                       ),
                     ],
@@ -315,8 +317,8 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
     return GestureDetector(
       onTap: () => onTap(value),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -356,14 +358,14 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
         children: [
           // Filter / Sort bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 Expanded(
                   child: GestureDetector(
                     onTap: _showFilterSheet,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: AppTheme.surfaceColor,
                         borderRadius: BorderRadius.circular(14),
@@ -372,7 +374,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.03),
                             blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            offset: Offset(0, 4),
                           ),
                         ],
                       ),
@@ -380,9 +382,8 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.tune_rounded, size: 18, color: AppTheme.primaryColor),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Filter & Sort',
+                          SizedBox(width: 8),
+                          Text('Filter & Sort'.tr(context),
                             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                           ),
                         ],
@@ -390,10 +391,10 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 // Results count
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(14),
@@ -414,7 +415,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
           // Active filters display
           if (_sortBy != 'default' || _priceRange.start > 0 || _priceRange.end < 500)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: SizedBox(
                 height: 36,
                 child: ListView(
@@ -432,7 +433,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                       _buildActiveFilter(
                         '\$${_priceRange.start.round()} - \$${_priceRange.end.round()}',
                         () => setState(() {
-                          _priceRange = const RangeValues(0, 500);
+                          _priceRange = RangeValues(0, 500);
                           _applySortAndFilter();
                         }),
                       ),
@@ -444,17 +445,17 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
           // Products Grid/List
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : _products.isEmpty
-                    ? const EmptyState(message: 'No products in this category')
+                    ? EmptyState(message: 'No products in this category')
                     : _isGridView
                         ? GridView.builder(
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.65,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
+                            padding: EdgeInsets.all(16),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: Responsive(context).isSmall ? 2 : Responsive(context).isMedium ? 2 : 3,
+                              childAspectRatio: Responsive(context).isSmall ? 0.6 : Responsive(context).isMedium ? 0.58 : 0.65,
+                              crossAxisSpacing: Responsive(context).isSmall ? 8 : 14,
+                              mainAxisSpacing: Responsive(context).isSmall ? 8 : 14,
                             ),
                             itemCount: _products.length,
                             itemBuilder: (context, index) {
@@ -470,9 +471,9 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                             },
                           )
                         : ListView.separated(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.all(16),
                             itemCount: _products.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            separatorBuilder: (_, _) => SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final product = _products[index];
                               return _buildListTile(context, product);
@@ -486,8 +487,8 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
 
   Widget _buildActiveFilter(String label, VoidCallback onRemove) {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: EdgeInsets.only(right: 8),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: AppTheme.primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
@@ -500,7 +501,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
             label,
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primaryColor),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           GestureDetector(
             onTap: onRemove,
             child: Icon(Icons.close, size: 14, color: AppTheme.primaryColor),
@@ -518,7 +519,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
         arguments: {'productId': product.id},
       ),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.circular(20),
@@ -541,7 +542,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     )
                   : Icon(Icons.image, size: 36, color: Colors.grey[400]),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             // Product info
             Expanded(
               child: Column(
@@ -551,15 +552,15 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, height: 1.3),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, height: 1.3),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   if (product.brand != null)
                     Text(
                       product.brand!,
                       style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                     ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   Row(
                     children: [
                       Text(
@@ -571,7 +572,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                         ),
                       ),
                       if (product.comparePrice != null) ...[
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Text(
                           '\$${product.comparePrice!.toStringAsFixed(2)}',
                           style: TextStyle(
@@ -584,17 +585,17 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     ],
                   ),
                   if (product.rating > 0) ...[
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Row(
                       children: [
                         ...List.generate(5, (i) {
                           return Icon(
                             i < product.rating.floor() ? Icons.star : Icons.star_border,
                             size: 14,
-                            color: const Color(0xFFFFC107),
+                            color: Color(0xFFFFC107),
                           );
                         }),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         Text(
                           '(${product.reviewCount})',
                           style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
@@ -609,7 +610,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
             Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -617,16 +618,16 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                       BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
                     ],
                   ),
-                  child: const Icon(Icons.favorite_border, size: 18, color: AppTheme.textSecondary),
+                  child: Icon(Icons.favorite_border, size: 18, color: AppTheme.textSecondary),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.add_shopping_cart, size: 18, color: Colors.white),
+                  child: Icon(Icons.add_shopping_cart, size: 18, color: Colors.white),
                 ),
               ],
             ),

@@ -27,7 +27,7 @@ class AuthController extends Controller
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->load('store'),
             'token' => $token,
         ], 201);
     }
@@ -51,7 +51,7 @@ class AuthController extends Controller
         $token = $user->createToken($data['device_name'] ?? 'api-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->load('store'),
             'token' => $token,
         ]);
     }

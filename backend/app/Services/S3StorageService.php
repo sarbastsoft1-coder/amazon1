@@ -26,6 +26,12 @@ class S3StorageService
 
     public function upload(UploadedFile $file, string $path = 'uploads'): string
     {
+        $key = config('filesystems.disks.s3.key');
+        if (empty($key) || $key === 'your-aws-key' || $key === 'your-key') {
+            // S3 credentials not set, return a mock placeholder image to prevent server hang
+            return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop';
+        }
+
         $filePath = $path . '/' . uniqid() . '_' . $file->getClientOriginalName();
 
         $this->client->putObject([

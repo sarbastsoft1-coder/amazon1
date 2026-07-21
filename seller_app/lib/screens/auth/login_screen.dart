@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     final ok = await context.read<AuthProvider>().login(_email.text, _password.text);
-    if (ok && mounted) Navigator.pushReplacementNamed(context, AppRoutes.kyc);
+    if (ok && mounted) Navigator.pushReplacementNamed(context, AppRoutes.storeInfo);
   }
 
   @override

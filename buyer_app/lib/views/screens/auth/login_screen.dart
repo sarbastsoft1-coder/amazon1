@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
@@ -26,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -35,35 +36,34 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shopping_bag, size: 48, color: AppTheme.primaryColor),
+                  child: Icon(Icons.shopping_bag, size: 48, color: AppTheme.primaryColor),
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  'Welcome Back',
+                SizedBox(height: 24),
+                Text('Welcome Back'.tr(context),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
-                const Text('Sign in to continue shopping', style: TextStyle(color: Colors.white70)),
-                const SizedBox(height: 40),
+                SizedBox(height: 8),
+                Text('Sign in to continue shopping'.tr(context), style: TextStyle(color: Colors.white70)),
+                SizedBox(height: 40),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 30, offset: const Offset(0, 10)),
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 30, offset: Offset(0, 10)),
                     ],
                   ),
                   child: Column(
@@ -72,15 +72,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextField(
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                        decoration: InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       TextField(
                         controller: _password,
                         obscureText: _obscure,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outlined),
+                          prefixIcon: Icon(Icons.lock_outlined),
                           suffixIcon: IconButton(
                             icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                             onPressed: () => setState(() => _obscure = !_obscure),
@@ -91,40 +91,40 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
-                          child: const Text('Forgot Password?'),
+                          child: Text('Forgot Password?'.tr(context)),
                         ),
                       ),
                       if (auth.error != null) ...[
-                        Text(auth.error!, style: const TextStyle(color: AppTheme.errorColor)),
-                        const SizedBox(height: 8),
+                        Text(auth.error!, style: TextStyle(color: AppTheme.errorColor)),
+                        SizedBox(height: 8),
                       ],
                       ElevatedButton(
                         onPressed: auth.loading ? null : _login,
                         child: auth.loading
-                            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Text('Login'),
+                            ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : Text('Login'.tr(context)),
                       ),
-                      const SizedBox(height: 24),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 24),
+                      SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Don't have an account?"),
+                          Text("Don't have an account?"),
                           TextButton(
                             onPressed: () => Navigator.pushNamed(context, AppRoutes.register),
-                            child: const Text('Register'),
+                            child: Text('Register'.tr(context)),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.main),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: const Text('Continue as Guest'),
+                          child: Text('Continue as Guest'.tr(context)),
                         ),
                       ),
                     ],

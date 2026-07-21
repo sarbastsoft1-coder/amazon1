@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
@@ -27,45 +28,45 @@ class _SearchScreenState extends State<SearchScreen> {
         title: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search products...',
+          decoration: InputDecoration(
+            hintText: 'Search products...'.tr(context),
             border: InputBorder.none,
           ),
           onSubmitted: _search,
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.mic),
+            icon: Icon(Icons.mic),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
+            icon: Icon(Icons.qr_code_scanner),
             onPressed: () {},
           ),
         ],
       ),
       body: provider.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : provider.products.isNotEmpty
               ? Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       child: Row(
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {},
-                              icon: const Icon(Icons.filter_list),
-                              label: const Text('Filter'),
+                              icon: Icon(Icons.filter_list),
+                              label: Text('Filter'.tr(context)),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {},
-                              icon: const Icon(Icons.sort),
-                              label: const Text('Sort'),
+                              icon: Icon(Icons.sort),
+                              label: Text('Sort'.tr(context)),
                             ),
                           ),
                         ],
@@ -86,11 +87,11 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                               child: product.images.isNotEmpty
                                   ? Image.network(product.images.first, fit: BoxFit.cover)
-                                  : const Icon(Icons.image),
+                                  : Icon(Icons.image),
                             ),
                             title: Text(product.name),
                             subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                            trailing: Icon(Icons.arrow_forward_ios, size: 16),
                             onTap: () => Navigator.pushNamed(context, AppRoutes.productDetails, arguments: {'productId': product.id}),
                           );
                         },
@@ -99,10 +100,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 )
               : ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   children: [
-                    const Text('Recent Searches', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 8),
+                    Text('Recent Searches'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       children: _recent.map((s) => ActionChip(
@@ -113,9 +114,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         },
                       )).toList(),
                     ),
-                    const SizedBox(height: 24),
-                    const Text('Popular Searches', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 24),
+                    Text('Popular Searches'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       children: _popular.map((s) => ActionChip(

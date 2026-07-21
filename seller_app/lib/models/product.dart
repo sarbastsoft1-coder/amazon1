@@ -10,6 +10,8 @@ class Product {
   final List<dynamic> images;
   final bool isActive;
   final String? amazonAsin;
+  final bool isAuction;
+  final DateTime? auctionEndTime;
 
   Product({
     required this.id,
@@ -23,6 +25,8 @@ class Product {
     required this.images,
     this.isActive = true,
     this.amazonAsin,
+    this.isAuction = false,
+    this.auctionEndTime,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -38,6 +42,8 @@ class Product {
       images: json['images'] ?? [],
       isActive: json['is_active'] ?? true,
       amazonAsin: json['amazon_asin'],
+      isAuction: json['is_auction'] ?? false,
+      auctionEndTime: json['auction_end_time'] != null ? DateTime.parse(json['auction_end_time']) : null,
     );
   }
 }

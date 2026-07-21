@@ -69,8 +69,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
     final provider = context.read<ProductProvider>();
     final ok = widget.product == null
-        ? await provider.createProduct(data)
-        : await provider.updateProduct(widget.product!.id, data);
+        ? await provider.createProduct(data, [])
+        : await provider.updateProduct(widget.product!.id, data, []);
 
     setState(() => _saving = false);
     if (ok && mounted) Navigator.pop(context);

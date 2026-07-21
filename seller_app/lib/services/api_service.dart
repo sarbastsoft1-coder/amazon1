@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
+    // defaultValue: 'https://backend-qqq25.vercel.app/api',
     defaultValue: 'http://127.0.0.1:8000/api',
   );
 
@@ -69,5 +72,36 @@ class ApiService {
         if (token != null) 'Authorization': 'Bearer $token',
       },
     );
+  }
+
+  static Future<http.Response> postMultipart(
+    String path,
+    Map<String, String> fields,
+    List<XFile> files, {
+    String method = 'POST',
+  }) async {
+    final token = await getToken();
+    final uri = Uri.parse('$baseUrl$path');
+    final request = http.MultipartRequest(method, uri);
+
+    request.headers.addAll({
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    });
+
+    request.fields.addAll(fields);
+
+    for (var file in files) {
+      final bytes = await file.readAsBytes();
+      final multipartFile = http.MultipartFile.fromBytes(
+        'images[]',
+        bytes,
+        filename: file.name.isNotEmpty ? file.name : 'image.jpg',
+      );
+      request.files.add(multipartFile);
+    }
+
+    final streamedResponse = await request.send();
+    return http.Response.fromStream(streamedResponse);
   }
 }

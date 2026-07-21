@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   Future<void> _register() async {
     final ok = await context.read<AuthProvider>().register(_name.text, _email.text, _password.text);
-    if (ok && mounted) Navigator.pushReplacementNamed(context, AppRoutes.kyc);
+    if (ok && mounted) Navigator.pushReplacementNamed(context, AppRoutes.storeInfo);
   }
 
   @override

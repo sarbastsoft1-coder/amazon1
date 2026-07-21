@@ -7,7 +7,6 @@ import '../screens/auth/register_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/auth/reset_password_screen.dart';
-import '../screens/kyc/kyc_screen.dart';
 import '../screens/kyc/store_info_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -34,7 +33,6 @@ class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String otp = '/otp';
   static const String resetPassword = '/reset-password';
-  static const String kyc = '/kyc';
   static const String storeInfo = '/store-info';
   static const String main = '/main';
   static const String dashboard = '/dashboard';
@@ -72,8 +70,6 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const OtpScreen());
       case resetPassword:
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
-      case kyc:
-        return MaterialPageRoute(builder: (_) => const KycScreen());
       case storeInfo:
         return MaterialPageRoute(builder: (_) => const StoreInfoScreen());
       case main:

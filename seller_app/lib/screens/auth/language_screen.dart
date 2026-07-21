@@ -222,7 +222,7 @@ class _LanguageScreenState extends State<LanguageScreen> with SingleTickerProvid
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
+                      onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.onboarding),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.secondaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

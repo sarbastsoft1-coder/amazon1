@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import '../../../config/routes.dart';
 
@@ -20,9 +21,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(title: Text('Reset Password'.tr(context))),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -31,21 +32,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               obscureText: _obscure,
               decoration: InputDecoration(
                 labelText: 'New Password',
-                prefixIcon: const Icon(Icons.lock),
+                prefixIcon: Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
               controller: _confirm,
               obscureText: _obscure,
-              decoration: const InputDecoration(labelText: 'Confirm Password', prefixIcon: Icon(Icons.lock)),
+              decoration: InputDecoration(labelText: 'Confirm Password', prefixIcon: Icon(Icons.lock)),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(onPressed: _reset, child: const Text('Reset Password')),
+            SizedBox(height: 24),
+            ElevatedButton(onPressed: _reset, child: Text('Reset Password'.tr(context))),
           ],
         ),
       ),

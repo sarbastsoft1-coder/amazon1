@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
@@ -15,7 +16,7 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderStateMixin {
   late final _tabController = TabController(length: 7, vsync: this);
 
-  final _tabs = const ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'All'];
+  final _tabs = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'All'];
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
     final provider = context.watch<OrderProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Text('My Orders'.tr(context)),
         bottom: !context.watch<AuthProvider>().isAuthenticated ? null : TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -44,32 +45,32 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.receipt_long_rounded, size: 80, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text('Please login to view your orders', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                  const SizedBox(height: 24),
+                  Icon(Icons.receipt_long_rounded, size: 80, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('Please login to view your orders'.tr(context), style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-                    child: const Text('Login'),
+                    child: Text('Login'.tr(context)),
                   ),
                 ],
               ),
             )
           : provider.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
               children: _tabs.map((tab) {
                 final orders = tab == 'All'
                     ? provider.orders
                     : provider.orders.where((o) => o.status.toLowerCase() == tab.toLowerCase()).toList();
-                if (orders.isEmpty) return const Center(child: Text('No orders'));
+                if (orders.isEmpty) return Center(child: Text('No orders'.tr(context)));
                 return ListView.builder(
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
                     final order = orders[index];
                     return Card(
-                      margin: const EdgeInsets.all(12),
+                      margin: EdgeInsets.all(12),
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: _statusColor(order.status),
@@ -77,7 +78,7 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
                         ),
                         title: Text(order.orderNumber),
                         subtitle: Text('Status: ${order.status.toUpperCase()}\n${order.createdAt.toString().split(' ')[0]}'),
-                        trailing: Text('\$${order.total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                        trailing: Text('\$${order.total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                         onTap: () => Navigator.pushNamed(context, AppRoutes.orderDetails, arguments: {'orderId': order.id}),
                       ),
                     );
@@ -120,36 +121,36 @@ class OrderDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Order Details')),
+      appBar: AppBar(title: Text('Order Details'.tr(context))),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Order #$orderId', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            const Card(
+            SizedBox(height: 16),
+            Card(
               child: ListTile(
                 leading: Icon(Icons.headphones, color: AppTheme.primaryColor),
-                title: Text('Wireless Headphones'),
-                subtitle: Text('Quantity: 1'),
+                title: Text('Wireless Headphones'.tr(context)),
+                subtitle: Text('Quantity: 1'.tr(context)),
                 trailing: Text('\$99.99'),
               ),
             ),
-            const SizedBox(height: 16),
-            const Card(
+            SizedBox(height: 16),
+            Card(
               child: ListTile(
                 leading: Icon(Icons.location_on, color: AppTheme.primaryColor),
-                title: Text('Shipping Address'),
-                subtitle: Text('123 Main St, New York, 10001'),
+                title: Text('Shipping Address'.tr(context)),
+                subtitle: Text('123 Main St, New York, 10001'.tr(context)),
               ),
             ),
-            const Spacer(),
+            Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, AppRoutes.trackOrder, arguments: {'orderId': orderId}),
-                child: const Text('Track Order'),
+                child: Text('Track Order'.tr(context)),
               ),
             ),
           ],
@@ -173,14 +174,14 @@ class TrackOrderScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Track Order')),
+      appBar: AppBar(title: Text('Track Order'.tr(context))),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Order #$orderId', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ...steps.map((s) => _buildStep(s['title'] as String, s['subtitle'] as String, s['completed'] as bool)),
           ],
         ),
@@ -191,7 +192,7 @@ class TrackOrderScreen extends StatelessWidget {
   Widget _buildStep(String title, String subtitle, bool completed) {
     return ListTile(
       leading: Icon(completed ? Icons.check_circle : Icons.radio_button_unchecked, color: completed ? Colors.green : Colors.grey, size: 28),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(subtitle),
     );
   }

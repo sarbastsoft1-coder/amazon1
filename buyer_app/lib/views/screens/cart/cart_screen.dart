@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
@@ -12,9 +13,9 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Shopping Cart')),
+      appBar: AppBar(title: Text('Shopping Cart'.tr(context))),
       body: cart.items.isEmpty
-          ? const EmptyState(message: 'Your cart is empty', icon: Icons.shopping_cart_outlined)
+          ? EmptyState(message: 'Your cart is empty', icon: Icons.shopping_cart_outlined)
           : Column(
               children: [
                 Expanded(
@@ -28,14 +29,14 @@ class CartScreen extends StatelessWidget {
                         background: Container(
                           color: Colors.red,
                           alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 16),
-                          child: const Icon(Icons.delete, color: Colors.white),
+                          padding: EdgeInsets.only(right: 16),
+                          child: Icon(Icons.delete, color: Colors.white),
                         ),
                         onDismissed: (_) => cart.remove(item.product),
                         child: Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12),
                             child: Row(
                               children: [
                                 Container(
@@ -47,27 +48,27 @@ class CartScreen extends StatelessWidget {
                                   ),
                                   child: item.product.images.isNotEmpty
                                       ? Image.network(item.product.images.first, fit: BoxFit.cover)
-                                      : const Icon(Icons.image),
+                                      : Icon(Icons.image),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                      Text('\$${item.product.price.toStringAsFixed(2)}', style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                                      Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold)),
+                                      Text('\$${item.product.price.toStringAsFixed(2)}', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                 ),
                                 Row(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.remove_circle_outline),
+                                      icon: Icon(Icons.remove_circle_outline),
                                       onPressed: () => cart.updateQuantity(item.product, item.quantity - 1),
                                     ),
-                                    Text('${item.quantity}', style: const TextStyle(fontSize: 16)),
+                                    Text('${item.quantity}', style: TextStyle(fontSize: 16)),
                                     IconButton(
-                                      icon: const Icon(Icons.add_circle_outline),
+                                      icon: Icon(Icons.add_circle_outline),
                                       onPressed: () => cart.updateQuantity(item.product, item.quantity + 1),
                                     ),
                                   ],
@@ -81,8 +82,8 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
                   ),
@@ -92,16 +93,16 @@ class CartScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            Text('\$${cart.total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                            Text('Total'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text('\$${cart.total.toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () => Navigator.pushNamed(context, AppRoutes.checkout),
-                            child: const Text('Checkout'),
+                            child: Text('Checkout'.tr(context)),
                           ),
                         ),
                       ],

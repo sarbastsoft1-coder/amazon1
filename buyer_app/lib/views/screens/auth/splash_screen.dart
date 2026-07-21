@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
@@ -21,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+    _animController = AnimationController(vsync: this, duration: Duration(milliseconds: 1500));
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animController, curve: Curves.easeIn));
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutBack));
     
@@ -43,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // Wait for splash animations and token loading
     final results = await Future.wait([
-      Future.delayed(const Duration(seconds: 3)),
+      Future.delayed(Duration(seconds: 3)),
       authProvider.loadToken(),
       SharedPreferences.getInstance(),
     ]);
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [AppTheme.primaryColor, AppTheme.primaryDark],
             begin: Alignment.topLeft,
@@ -84,27 +85,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 24, offset: const Offset(0, 12))
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 24, offset: Offset(0, 12))
                           ],
                         ),
-                        child: const Icon(Icons.shopping_bag_rounded, size: 80, color: AppTheme.primaryColor),
+                        child: Icon(Icons.shopping_bag_rounded, size: 80, color: AppTheme.primaryColor),
                       ),
-                      const SizedBox(height: 32),
-                      Text(
-                        'AMAZON',
+                      SizedBox(height: 32),
+                      Text('AMAZON'.tr(context),
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                               color: Colors.white,
                               letterSpacing: 2,
                             ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Premium Shopping',
+                      SizedBox(height: 8),
+                      Text('Premium Shopping'.tr(context),
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.8),
                               letterSpacing: 1.5,

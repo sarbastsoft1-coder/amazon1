@@ -1,3 +1,4 @@
+import 'package:buyer_app/core/localization/string_extension.dart';
 import 'package:flutter/material.dart';
 import '../../../config/routes.dart';
 
@@ -9,24 +10,24 @@ class OrderSuccessScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, size: 100, color: Colors.green),
-              const SizedBox(height: 24),
-              Text('Order Placed!', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              const Text('Thank you for your purchase. You will receive a confirmation email shortly.', textAlign: TextAlign.center),
-              const SizedBox(height: 32),
+              Icon(Icons.check_circle, size: 100, color: Colors.green),
+              SizedBox(height: 24),
+              Text('Order Placed!'.tr(context), style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              SizedBox(height: 16),
+              Text('Thank you for your purchase. You will receive a confirmation email shortly.'.tr(context), textAlign: TextAlign.center),
+              SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (route) => false),
-                child: const Text('Continue Shopping'),
+                child: Text('Continue Shopping'.tr(context)),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (route) => false),
-                child: const Text('View Orders'),
+                child: Text('View Orders'.tr(context)),
               ),
             ],
           ),

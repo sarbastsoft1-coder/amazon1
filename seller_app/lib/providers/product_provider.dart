@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
 
@@ -27,8 +29,19 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createProduct(Map<String, dynamic> data) async {
-    final response = await ApiService.post('/products', data);
+  Map<String, String> _prepareFields(Map<String, dynamic> data) {
+    final Map<String, String> fields = {};
+    data.forEach((key, value) {
+      if (value != null) {
+        fields[key] = value.toString();
+      }
+    });
+    return fields;
+  }
+
+  Future<bool> createProduct(Map<String, dynamic> data, List<XFile> images) async {
+    final Map<String, String> fields = _prepareFields(data);
+    final response = await ApiService.postMultipart('/products', fields, images);
     if (response.statusCode == 201) {
       await fetchProducts();
       return true;
@@ -36,11 +49,21 @@ class ProductProvider extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> updateProduct(int id, Map<String, dynamic> data) async {
-    final response = await ApiService.put('/products/$id', data);
-    if (response.statusCode == 200) {
-      await fetchProducts();
-      return true;
+  Future<bool> updateProduct(int id, Map<String, dynamic> data, List<XFile> images) async {
+    final Map<String, String> fields = _prepareFields(data);
+    if (images.isNotEmpty) {
+      fields['_method'] = 'PUT';
+      final response = await ApiService.postMultipart('/products/$id', fields, images, method: 'POST');
+      if (response.statusCode == 200) {
+        await fetchProducts();
+        return true;
+      }
+    } else {
+      final response = await ApiService.put('/products/$id', data);
+      if (response.statusCode == 200) {
+        await fetchProducts();
+        return true;
+      }
     }
     return false;
   }

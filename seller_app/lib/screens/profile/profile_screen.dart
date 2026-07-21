@@ -41,7 +41,6 @@ class ProfileScreen extends StatelessWidget {
           ),
           _buildSectionTitle('Store'),
           _buildTile(context, Icons.store, 'Store Information', null),
-          _buildTile(context, Icons.verified_user, 'Business Verification', null),
           _buildTile(context, Icons.account_balance, 'Bank Account', null),
           _buildTile(context, Icons.local_shipping, 'Shipping Settings', null),
           _buildSectionTitle('Preferences'),
