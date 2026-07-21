@@ -261,7 +261,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       'price': double.tryParse(_price.text) ?? 0.0,
       'stock': int.tryParse(_stock.text) ?? 0,
       'sku': _sku.text.isNotEmpty ? _sku.text : null,
-      'is_auction': _isAuction,
+      'is_auction': _isAuction ? 1 : 0,
       'auction_end_time': _isAuction && _auctionEndTime != null ? _auctionEndTime!.toIso8601String() : null,
     };
 

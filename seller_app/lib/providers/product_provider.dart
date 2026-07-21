@@ -46,6 +46,7 @@ class ProductProvider extends ChangeNotifier {
       await fetchProducts();
       return true;
     }
+    debugPrint('Create Product Error: ${response.statusCode} - ${response.body}');
     return false;
   }
 
