@@ -20,6 +20,24 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
   bool _loading = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().user;
+      if (user != null) {
+        setState(() {
+          if (user.store != null) {
+            _storeName.text = user.store!['name'] ?? '';
+            _description.text = user.store!['description'] ?? '';
+          }
+          _phone.text = user.phone ?? '';
+          _address.text = user.address ?? '';
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _storeName.dispose();
     _description.dispose();
@@ -31,26 +49,47 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
+    final user = context.read<AuthProvider>().user;
+    final storeId = user?.storeId;
+    final isUpdating = storeId != null;
+
     try {
-      final response = await ApiService.post('/stores', {
+      final payload = {
         'name': _storeName.text,
         'description': _description.text,
-      });
+        'phone': _phone.text,
+        'address': _address.text.isNotEmpty ? _address.text : null,
+      };
 
-      if (response.statusCode == 201) {
+      final response = isUpdating
+          ? await ApiService.put('/stores/$storeId', payload)
+          : await ApiService.post('/stores', payload);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (!mounted) return;
         // Refresh user info to get the new store ID
         await context.read<AuthProvider>().fetchUser();
         setState(() => _loading = false);
         if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (route) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isUpdating ? 'Store updated successfully!' : 'Store created successfully!'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.green,
+            ),
+          );
+          if (!isUpdating) {
+            Navigator.pushNamedAndRemoveUntil(context, AppRoutes.main, (route) => false);
+          } else {
+            Navigator.pop(context);
+          }
         }
       } else {
         setState(() => _loading = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to create store: ${response.body}'),
+              content: Text('Failed to save store: ${response.body}'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.red,
             ),
@@ -73,8 +112,11 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    final isUpdating = user?.storeId != null;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Store Information')),
+      appBar: AppBar(title: Text(isUpdating ? 'Edit Store' : 'Store Information')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -82,9 +124,17 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Store Details', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                isUpdating ? 'Update Store Details' : 'Store Details',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              const Text('Provide your store information for approval.', style: TextStyle(color: Colors.grey)),
+              Text(
+                isUpdating 
+                    ? 'Modify your store details below.' 
+                    : 'Provide your store information for approval.',
+                style: const TextStyle(color: Colors.grey),
+              ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _storeName,
@@ -127,9 +177,22 @@ class _StoreInfoScreenState extends State<StoreInfoScreen> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading ? const CircularProgressIndicator() : const Text('Submit for Approval'),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: _loading 
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : Text(isUpdating ? 'Save Changes' : 'Submit for Approval'),
+                ),
               ),
             ],
           ),

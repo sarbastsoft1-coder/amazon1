@@ -23,15 +23,27 @@ class StoreController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
+            'phone' => 'required|string|max:255',
+            'address' => 'nullable|string',
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
-        $data['user_id'] = $request->user()->id;
+        $user = $request->user();
+        $user->update([
+            'phone' => $data['phone'],
+            'address' => $data['address'] ?? null,
+        ]);
 
-        $store = Store::create($data);
+        $storeData = [
+            'name' => $data['name'],
+            'description' => $data['description'],
+            'slug' => Str::slug($data['name']),
+            'user_id' => $user->id,
+        ];
 
-        return response()->json($store, 201);
+        $store = Store::create($storeData);
+
+        return response()->json($store->load('owner'), 201);
     }
 
     public function update(Request $request, Store $store)
@@ -39,17 +51,41 @@ class StoreController extends Controller
         $this->authorize('update', $store);
 
         $data = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'name' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'phone' => 'sometimes|required|string|max:255',
+            'address' => 'nullable|string',
             'is_active' => 'sometimes|boolean',
         ]);
 
-        if (isset($data['name'])) {
-            $data['slug'] = Str::slug($data['name']);
+        $user = $request->user();
+        $userUpdate = [];
+        if (isset($data['phone'])) {
+            $userUpdate['phone'] = $data['phone'];
+        }
+        if (array_key_exists('address', $data)) {
+            $userUpdate['address'] = $data['address'];
+        }
+        if (!empty($userUpdate)) {
+            $user->update($userUpdate);
         }
 
-        $store->update($data);
+        $storeData = [];
+        if (isset($data['name'])) {
+            $storeData['name'] = $data['name'];
+            $storeData['slug'] = Str::slug($data['name']);
+        }
+        if (isset($data['description'])) {
+            $storeData['description'] = $data['description'];
+        }
+        if (isset($data['is_active'])) {
+            $storeData['is_active'] = $data['is_active'];
+        }
 
-        return response()->json($store);
+        if (!empty($storeData)) {
+            $store->update($storeData);
+        }
+
+        return response()->json($store->load('owner'));
     }
 }
