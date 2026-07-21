@@ -102,7 +102,7 @@ class ProductCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             product.isAuction 
-                                ? '\$${(product.currentBid ?? product.startingBid ?? 0).toStringAsFixed(2)}'
+                                ? '\$${(product.highestBid ?? product.price).toStringAsFixed(2)}'
                                 : '\$${product.price.toStringAsFixed(2)}',
                             style: TextStyle(
                               color: AppTheme.primaryColor,
@@ -125,8 +125,7 @@ class ProductCard extends StatelessWidget {
                   if (product.isAuction) ...[
                     SizedBox(height: 6),
                     AuctionCountdownTimer(
-                      auctionStart: product.auctionStart,
-                      auctionEnd: product.auctionEnd,
+                      auctionEndTime: product.auctionEndTime,
                     ),
                   ],
                 ],

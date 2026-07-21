@@ -170,4 +170,20 @@ class ProductProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<bool> placeBid(int productId, double amount) async {
+    try {
+      final response = await ApiService.post(
+        '/products/$productId/bids',
+        {'amount': amount},
+      );
+      if (response.statusCode == 201) {
+        // Refresh product data if needed, or rely on caller to refetch
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Failed to place bid: $e');
+    }
+    return false;
+  }
 }

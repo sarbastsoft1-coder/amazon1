@@ -45,9 +45,9 @@ class _AuctionsScreenState extends State<AuctionsScreen> with SingleTickerProvid
           if (provider.loading) {
             return const Center(child: CircularProgressIndicator());
           }
-          final live = provider.auctions.where((p) => p.status == 'live').toList();
-          final upcoming = provider.auctions.where((p) => p.status == 'upcoming').toList();
-          final closed = provider.auctions.where((p) => p.status == 'closed').toList();
+          final live = provider.auctions.where((p) => p.auctionEndTime != null && p.auctionEndTime!.isAfter(DateTime.now())).toList();
+          final upcoming = [];
+          final closed = provider.auctions.where((p) => p.auctionEndTime != null && p.auctionEndTime!.isBefore(DateTime.now())).toList();
           
           return TabBarView(
             controller: _tabController,
@@ -82,9 +82,9 @@ class _AuctionsScreenState extends State<AuctionsScreen> with SingleTickerProvid
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current Bid: \$${(product.currentBid ?? product.startingBid ?? 0).toStringAsFixed(2)}'),
+                Text('Current Bid: \$${(product.highestBid ?? product.price).toStringAsFixed(2)}'),
                 SizedBox(height: 4),
-                AuctionCountdownTimer(auctionStart: product.auctionStart, auctionEnd: product.auctionEnd),
+                AuctionCountdownTimer(auctionEndTime: product.auctionEndTime),
               ],
             ),
             isThreeLine: true,

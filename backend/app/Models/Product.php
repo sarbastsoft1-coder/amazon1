@@ -43,6 +43,10 @@ class Product extends Model
         'auction_end_time' => 'datetime',
     ];
 
+    protected $appends = [
+        'highest_bid',
+    ];
+
     public function store()
     {
         return $this->belongsTo(Store::class);
@@ -56,5 +60,16 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function bids()
+    {
+        return $this->hasMany(Bid::class);
+    }
+
+    public function getHighestBidAttribute()
+    {
+        $highest = $this->bids()->max('amount');
+        return $highest ?: $this->price;
     }
 }

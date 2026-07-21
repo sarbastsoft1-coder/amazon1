@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SpApiController;
 use App\Http\Controllers\Api\StoreController;
+use App\Http\Controllers\BidController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -23,6 +24,8 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    
+    Route::post('/products/{product}/bids', [BidController::class, 'store'])->middleware('role:buyer');
 
     Route::get('/stores', [StoreController::class, 'index']);
     Route::get('/stores/{store}', [StoreController::class, 'show']);

@@ -5,7 +5,9 @@ import '../../../config/routes.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/product.dart';
 import '../../../data/providers/cart_provider.dart';
+import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/wishlist_provider.dart';
+import '../../widgets/common/countdown_timer.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final int productId;
@@ -21,21 +23,84 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   final _productImages = [Colors.blue, Colors.green, Colors.orange, Colors.purple];
 
+  void _showBidBottomSheet(Product product) {
+    final TextEditingController bidController = TextEditingController();
+    final highest = product.highestBid ?? product.price;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Place Your Bid', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Current Highest Bid: \$${highest.toStringAsFixed(2)}', style: TextStyle(color: Colors.grey[700])),
+              SizedBox(height: 20),
+              TextField(
+                controller: bidController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Your Bid Amount',
+                  prefixIcon: Icon(Icons.attach_money),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  final amount = double.tryParse(bidController.text);
+                  if (amount == null || amount <= highest) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bid must be higher than \$${highest.toStringAsFixed(2)}')));
+                    return;
+                  }
+                  
+                  final success = await context.read<ProductProvider>().placeBid(product.id, amount);
+                  if (success) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bid placed successfully!')));
+                    context.read<ProductProvider>().fetchHomeData();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to place bid. Please try again.')));
+                  }
+                },
+                child: Text('Submit Bid', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+              SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final product = Product(
-      id: widget.productId,
-      name: 'Wireless Headphones',
-      slug: 'wireless-headphones',
-      description: 'High-quality wireless headphones with noise cancellation and long battery life. Enjoy crystal-clear sound, comfortable ear cushions, and up to 30 hours of playtime on a single charge.',
-      price: 99.99,
-      comparePrice: 129.99,
-      stock: 50,
-      sku: 'WH-001',
-      images: [],
-      rating: 4.5,
-      reviewCount: 128,
-      brand: 'Sony',
+    final productList = context.watch<ProductProvider>().allProducts;
+    final product = productList.firstWhere(
+      (p) => p.id == widget.productId,
+      orElse: () => Product(
+        id: widget.productId,
+        name: 'Loading...',
+        slug: '',
+        price: 0,
+        stock: 0,
+        images: [],
+      ),
     );
 
     final inWishlist = context.watch<WishlistProvider>().isInWishlist(product);
@@ -109,13 +174,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             SizedBox(height: 8),
             Row(
               children: [
-                Text('\$${product.price.toStringAsFixed(2)}', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                Text('\$${(product.isAuction ? (product.highestBid ?? product.price) : product.price).toStringAsFixed(2)}', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                 SizedBox(width: 12),
-                if (product.comparePrice != null)
+                if (product.comparePrice != null && !product.isAuction)
                   Text(
                     '\$${product.comparePrice!.toStringAsFixed(2)}',
                     style: TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey, fontSize: 16),
                   ),
+                if (product.isAuction) ...[
+                  Spacer(),
+                  AuctionCountdownTimer(auctionEndTime: product.auctionEndTime),
+                ]
               ],
             ),
             SizedBox(height: 8),
@@ -147,53 +216,82 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ],
         ),
       ),
-      bottomSheet: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.remove),
-                    onPressed: () => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1),
-                  ),
-                  Text('$_quantity', style: TextStyle(fontSize: 18)),
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: () => setState(() => _quantity++),
-                  ),
-                ],
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.read<CartProvider>().add(product, quantity: _quantity);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added to cart'.tr(context))));
-                  },
-                  child: Text('Add to Cart'.tr(context)),
+      bottomSheet: product.isAuction
+          ? Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)]),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Current Bid', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                          Text('\$${(product.highestBid ?? product.price).toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.primaryColor)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () => _showBidBottomSheet(product),
+                        child: Text('Place Bid'.tr(context)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.read<CartProvider>().add(product, quantity: _quantity);
-                    Navigator.pushNamed(context, AppRoutes.checkout);
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.secondaryColor),
-                  child: Text('Buy Now'.tr(context)),
+            )
+          : Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove),
+                          onPressed: () => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1),
+                        ),
+                        Text('$_quantity', style: TextStyle(fontSize: 18)),
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () => setState(() => _quantity++),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.read<CartProvider>().add(product, quantity: _quantity);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added to cart'.tr(context))));
+                        },
+                        child: Text('Add to Cart'.tr(context)),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.read<CartProvider>().add(product, quantity: _quantity);
+                          Navigator.pushNamed(context, AppRoutes.checkout);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.secondaryColor),
+                        child: Text('Buy Now'.tr(context)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 

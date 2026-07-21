@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../core/localization/string_extension.dart';
 
 class AuctionCountdownTimer extends StatefulWidget {
-  final DateTime? auctionStart;
-  final DateTime? auctionEnd;
+  final DateTime? auctionEndTime;
 
   const AuctionCountdownTimer({
     super.key,
-    this.auctionStart,
-    this.auctionEnd,
+    this.auctionEndTime,
   });
 
   @override
@@ -55,27 +53,22 @@ class _AuctionCountdownTimerState extends State<AuctionCountdownTimer> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.auctionStart == null || widget.auctionEnd == null) {
+    if (widget.auctionEndTime == null) {
       return const SizedBox.shrink();
     }
 
-    final start = widget.auctionStart!;
-    final end = widget.auctionEnd!;
+    final end = widget.auctionEndTime!;
     
-    bool isUpcoming = _now.isBefore(start);
-    bool isActive = _now.isAfter(start) && _now.isBefore(end);
+    bool isActive = _now.isBefore(end);
     bool isEnded = _now.isAfter(end);
 
-    Color bgColor = isEnded ? Colors.grey.shade300 : (isActive ? Colors.green.shade600 : Colors.orange.shade600);
+    Color bgColor = isEnded ? Colors.grey.shade300 : Colors.green.shade600;
     Color textColor = isEnded ? Colors.grey.shade700 : Colors.white;
 
     String labelText = '';
     String timeText = '';
 
-    if (isUpcoming) {
-      labelText = 'Starts in:'.tr(context);
-      timeText = _formatDuration(start.difference(_now));
-    } else if (isActive) {
+    if (isActive) {
       labelText = 'Ends in:'.tr(context);
       timeText = _formatDuration(end.difference(_now));
     } else {

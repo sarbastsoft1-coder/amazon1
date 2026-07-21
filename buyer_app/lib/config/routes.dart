@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../views/screens/auctions/auction_details_screen.dart';
 import '../views/screens/auctions/auctions_screen.dart';
 import '../views/screens/auth/forgot_password_screen.dart';
 import '../views/screens/auth/language_screen.dart';
@@ -116,7 +115,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AuctionsScreen());
       case auctionDetails:
         final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(builder: (_) => AuctionDetailsScreen(productId: args?['productId'] ?? 0));
+        return MaterialPageRoute(builder: (_) => ProductDetailsScreen(productId: args?['productId'] ?? 0));
       case wishlist:
         return MaterialPageRoute(builder: (_) => const WishlistScreen());
       case notifications:
